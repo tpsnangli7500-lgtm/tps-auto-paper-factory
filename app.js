@@ -60,19 +60,18 @@ async function callAI(messages, maxTokens){
 }
 
 /* ============ navigation ============ */
+const VIEWS = ['home','queue','editor','journal','lab','shield','reviewer','teenroop','student','citation','special','sahyogi','settings'];
 function showView(v){
-  ['dashboard','editor','settings'].forEach(x => $('#view-' + x).classList.toggle('hidden', x !== v));
+  if (!VIEWS.includes(v)) v = 'home';
+  VIEWS.forEach(x => { const el = $('#view-' + x); if (el) el.classList.toggle('hidden', x !== v); });
   $$('.side nav a').forEach(a => a.classList.toggle('active', a.dataset.view === v));
+  try { history.replaceState(null, '', '#' + v); } catch(e){}
   window.scrollTo({ top:0 });
 }
 $$('.side nav a').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
     if (a.dataset.view) showView(a.dataset.view);
-    else if (a.dataset.scroll){
-      showView('dashboard');
-      setTimeout(() => { const t = document.getElementById(a.dataset.scroll); if(t) t.scrollIntoView({ behavior:'smooth', block:'start' }); }, 60);
-    }
   });
 });
 
@@ -154,8 +153,8 @@ function renderScan(papers){
       '<button class="btn small act-an">💡 Analysis (Kami + Humari Research)</button></div>';
     d.querySelector('.act-add').addEventListener('click', () => {
       addToQueue(p.title.replace(/\.$/,''), store.get('target','Indian Journal of Pharmacology'), 'Scanner se — ' + (p.journal || '') + (p.doi ? ' • DOI ' + p.doi : ''));
-      alert('Topic Queue me jud gaya ✔ Neeche Queue me dekho.');
-      document.getElementById('queueSec').scrollIntoView({ behavior:'smooth' });
+      alert('Topic Queue me jud gaya ✔ Ab Queue section khul raha hai.');
+      showView('queue');
     });
     d.querySelector('.act-an').addEventListener('click', async (ev) => {
       const idea = d.querySelector('.idea');
@@ -581,6 +580,6 @@ setEditorText(savedDoc || SAMPLE);
 const dn = store.get('docName', ''); if (dn) $('#docName').value = dn;
 const lastScan = store.get('scan', null);
 if (lastScan && lastScan.papers && lastScan.papers.length) renderScan(lastScan.papers); else scanNow();
-if (location.hash === '#editor') showView('editor');
-if (location.hash === '#settings') showView('settings');
+const startHash = (location.hash || '').replace('#', '');
+if (VIEWS.includes(startHash)) showView(startHash);
 renderKeys();

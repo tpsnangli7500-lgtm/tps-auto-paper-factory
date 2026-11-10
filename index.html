@@ -12,17 +12,18 @@
     <div class="brand">🏭 TPS <span>Auto Paper</span> Factory</div>
     <div class="tagline">Raat ko chale, subah paper taiyaar</div>
     <nav>
-      <a href="#" data-view="dashboard" class="active">🏠 Dashboard</a>
-      <a href="#" data-scroll="scannerSec">🔭 Roz ki Khoj Scanner</a>
-      <a href="#" data-scroll="queueSec">📥 Topic Queue</a>
-      <a href="#" data-scroll="shieldSec">🛡️ Originality Shield</a>
+      <a href="#" data-view="home" class="active">🏠 Home (Roz ki Khoj)</a>
+      <a href="#" data-view="queue">📥 Topic Queue</a>
       <a href="#" data-view="editor">✍️ Manual Editor (Word)</a>
-      <a href="#" data-scroll="featSec">🧐 Reviewer Mode</a>
-      <a href="#" data-scroll="featSec">🎓 Student Mode</a>
-      <a href="#" data-scroll="labSec">🧪 Lab &amp; Experiment Desk</a>
-      <a href="#" data-scroll="journalSec">🔎 Journal Khoj Desk</a>
-      <a href="#" data-scroll="journalSec">🎯 Special Issue Radar</a>
-      <a href="#" data-scroll="featSec">📡 Citation Radar</a>
+      <a href="#" data-view="journal">🔎 Journal Khoj Desk</a>
+      <a href="#" data-view="lab">🧪 Lab &amp; Experiment Desk</a>
+      <a href="#" data-view="shield">🛡️ Originality Shield</a>
+      <a href="#" data-view="reviewer">🧐 Reviewer Mode</a>
+      <a href="#" data-view="teenroop">🎭 Ek Idea, Teen Roop</a>
+      <a href="#" data-view="student">🎓 Student Mode</a>
+      <a href="#" data-view="citation">📡 Citation Radar</a>
+      <a href="#" data-view="special">🎯 Special Issue Radar</a>
+      <a href="#" data-view="sahyogi">🤝 Sahyogi Scanner</a>
       <a href="#" data-view="settings">⚙️ Settings (AI Keys)</a>
     </nav>
     <div class="run-card">
@@ -34,10 +35,10 @@
   </aside>
 
   <main>
-    <!-- ================= DASHBOARD VIEW ================= -->
-    <section id="view-dashboard">
+    <!-- ================= HOME VIEW (sirf Roz ki Khoj) ================= -->
+    <section id="view-home">
       <div class="topbar">
-        <h1>Factory Dashboard</h1>
+        <h1>🏠 Home — Roz ki Khoj</h1>
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
           <span class="pill green">● System Taiyaar Hai</span>
           <span class="pill blue">💰 Kharcha: ₹0 (free models)</span>
@@ -56,6 +57,16 @@
         </div>
         <div class="scan-cards" id="scanCards"><div class="scan-note">⏳ Scan ho raha hai… internet se asal papers aa rahe hain.</div></div>
         <div class="areas">🎯 Tumhare kshetra (Scanner sirf inhi par nazar rakhega): <span id="areaLine">Neuropharmacology • Phytomedicine • Neend / Insomnia • Natural Products</span> — Settings se badal sakte ho.</div>
+      </div>
+
+      <div class="foot">TPS Auto Paper Factory • Har option apne alag section me hai — baayein menu se jis par kaam karna ho, wahi kholo • Bina tumhari haan ke koi paper submit nahi hoga</div>
+    </section>
+
+    <!-- ================= QUEUE / PRODUCTION VIEW ================= -->
+    <section id="view-queue" class="hidden">
+      <div class="topbar">
+        <h1>📥 Topic Queue &amp; Production</h1>
+        <span class="pill blue">🌙 Raat 11:00 PM — automatic run</span>
       </div>
 
       <!-- Production line -->
@@ -87,65 +98,6 @@
           <h3>🏭 Abhi Production Me</h3>
           <div id="prodCard" class="muted">Abhi koi draft nahi bana. Queue ke kisi topic par <b>“✨ AI Draft Banao”</b> dabao — outline + abstract + introduction ka pehla draft yahi banega (references raat ke full run me verify hokar lagenge).</div>
         </div>
-      </div>
-
-      <!-- Shield -->
-      <h2 class="sec" id="shieldSec">🛡️ Humanizer + Originality Shield — har paper isse guzarta hai</h2>
-      <div class="shield">
-        <div class="steps">
-          <div class="stp"><b>✍️ 1. Paragraph Humanizer</b><br>Har paragraph likhte samay hi insaani lehje me — vaaky lambai-chhotai badalti hui, AI wale ghise-pite shabd hataye hue.</div>
-          <div class="stp"><b>🔍 2. Nakal-Pakad (Similarity Self-Check)</b><br>Draft ko uske apne sources se milaya jata hai — source ke bahut paas wala hissa dobara apne shabdon me likha jata hai, sahi citation ke saath.</div>
-          <div class="stp"><b>🤖 3. AI-Pattern Report</b><br>Robotic pattern, dohraaye shabd aur ek-jaise vaaky — Quality Gate par puri report.</div>
-        </div>
-        <div class="honest">⚖️ Factory ka sachcha usool: ye teenon nakal aur robotic lekhan ko asal me bahut kam kar dete hain — lekin “100% detector-pass” ki guarantee duniya ka koi asal tool nahi de sakta. Asal suraksha hai: nakal bilkul nahi + har daave ka sahi citation.</div>
-      </div>
-
-      <!-- Features -->
-      <h2 class="sec" id="featSec">✨ Khaas Suvidhayein</h2>
-      <div class="feat-grid">
-        <div class="feat"><h3>🧐 1. Reviewer Mode</h3><p>Paper taiyaar hote hi do sakht nakli reviewer use padhte hain — asli journal ki tarah aetraaz, aur ant me editor ka faisla. <b>Ye kaam Correction Desk (Reviewer-Proof) aur raat ke run me hota hai.</b></p></div>
-        <div class="feat"><h3>🎭 3. Ek Idea, Teen Roop</h3><p>Scanner se chuna har idea ek saath: 📄 Review Paper • 🧾 IAEC Protocol • 🎤 Conference Poster/Abstract. Raat ke run ke saath manga ja sakta hai — chat me bolo “teen roop wali”.</p></div>
-        <div class="feat"><h3>🎓 5. Student / Guide Mode</h3><p>Students ke topic/data aur tumhare Haan/Na wala hisaab — <b>dusre charan me aayega</b> (students ke alag login lagenge).</p></div>
-        <div class="feat"><h3>📡 8. Citation Radar</h3><p>Chhape hue papers par nazar: kaun tumhara kaam cite kar raha hai — saptahik jaanch Babu chat me dega; naye paper me sahi jagah tumhare purane kaam ka sujhav Quality Gate par.</p></div>
-        <div class="feat"><h3>🎯 Special Issue & Deadline Radar</h3><p>Tumhare vishayon se milte special issues aur conference ki aakhri taareekhein — Scanner ki subah-wali report me hi sanket milega.</p></div>
-        <div class="feat"><h3>🤝 Sahyogi Scanner</h3><p>Scanner jin shodh-kartaon ko baar-baar dekhega, unhe sahyog ke liye sujhaya jayega. Parichay-patra bhi banega — bhejna tumhari haan ke baad hi.</p></div>
-      </div>
-
-      <!-- Lab desk -->
-      <h2 class="sec" id="labSec">🧪 Lab & Experiment Desk — saare lab upkaran, ek hi option me</h2>
-      <div class="lab-wrap">
-        <div style="font-size:13.5px; color:#33477a; line-height:1.6;">Experiment ki <b>shuruaat se paper tak</b> ka har kaam isi ek desk par. Ye upkaran <b>chat ke dwara</b> chalte hain — Babu ko bolo, kaam hokar yahi milega (dusre charan me inke apne form aayenge).</div>
-        <div class="lab-grid">
-          <div class="lab-tool"><div class="lt">💊 Dose Guru</div><div class="ld">Purani khoj + LD50 se surakshit dose ki range, safety margin, aur kitne janwar (n) chahiye — 3Rs ke saath.</div></div>
-          <div class="lab-tool"><div class="lt">🧫 Fingerprint Helper</div><div class="ld">HPTLC/HPLC se extract ki pehchan, batch-to-batch tulna, aur journal ke layak fingerprint report.</div></div>
-          <div class="lab-tool"><div class="lt">🗄️ Fail Vault</div><div class="ld">Fail hue prayog aur na-kaam doses ka record — naya design bante hi purani galti par chetaavni.</div></div>
-          <div class="lab-tool"><div class="lt">📓 Live Lab Diary</div><div class="ld">Roz ki readings jama hoti jayein, graph khud bante jayein, ajeeb number (outlier) par turant sanket.</div></div>
-          <div class="lab-tool"><div class="lt">📊 Statistics Doctor</div><div class="ld">Sahi test khud chune — ANOVA/t-test, Shapiro-Levene jaanch, exact P aur effect size (η²) ke saath.</div></div>
-          <div class="lab-tool"><div class="lt">📈 Figure Scientist</div><div class="ld">Data se journal-standard graph — sahi axis, sahi unit, significance ke nishaan; galat unit bane hi na.</div></div>
-        </div>
-        <div style="font-size:12px; color:#54678f; font-weight:600; margin-top:11px;">🔗 Ye desk IAEC Protocol (Teen Roop) aur Quality Gate se juda hai — lab ka data seedha paper me jayega.</div>
-      </div>
-
-      <!-- Journal desk -->
-      <h2 class="sec" id="journalSec">🔎 Journal Khoj Desk — Scopus / Web of Science me sahi journal dhundho</h2>
-      <div class="jsearch">
-        <input class="box" id="jTopic" type="text" placeholder="🔍 Apne paper ka vishay likho — jaise: neuroprotection, plant extract, insomnia…">
-        <button class="go" id="jSearchBtn">Khojo ➜</button>
-      </div>
-      <div class="filt" id="jFilters">
-        <span data-f="scopus" class="on">Scopus ✔</span>
-        <span data-f="wos" class="on">Web of Science (SCIE / ESCI)</span>
-        <span data-f="free" class="on">💚 Sirf Free (₹0)</span>
-        <span data-f="paid">💰 Paid bhi dikhao</span>
-        <label class="budget">Budget: ₹<input id="jBudget" type="number" min="0" placeholder="____"> tak</label>
-        <span data-f="review" >Sirf Review chhaapne wale</span>
-      </div>
-      <div id="jResults"></div>
-      <div class="sach">
-        🕵️ <b>Journal Sach-Check:</b> journal ka naam yahan dalo →
-        <span class="sachline"><input id="sachName" type="text" placeholder="Journal ka naam likho…"><button class="btn small primary" id="sachBtn">Jaancho</button></span>
-        <div id="sachOut"></div>
-        <div style="margin-top:6px;">Yaad rahe: <b>UGC-CARE list Feb 2025 me band ho chuki hai</b> — “CARE approved 2026” bolne wala journal jhooth bol raha hai. Upar ki khoj hamare <b>haath se verify kiye hue</b> journals ki suchi par chalti hai; suchi se bahar ke journal ki jaanch chat me Babu se karwao.</div>
       </div>
 
       <div class="stats">
@@ -197,6 +149,108 @@
           <button class="tbtn" id="tDiff">📐 Do Paper ki Tulna<small>Dusra roop chipkao — farak rang me (neeche dabba khulega)</small></button>
           <div id="diffBox" class="hidden"><textarea id="diffText" placeholder="Dusre paper ka text yahan chipkao…"></textarea><button class="btn small primary" id="diffGo">Tulna Karo</button><div id="diffOut"></div></div>
         </div>
+      </div>
+    </section>
+
+    <!-- ================= JOURNAL VIEW ================= -->
+    <section id="view-journal" class="hidden">
+      <div class="topbar"><h1>🔎 Journal Khoj Desk</h1><span class="pill blue">Scopus / Web of Science — haath se verify ki hui suchi</span></div>
+      <div class="jsearch">
+        <input class="box" id="jTopic" type="text" placeholder="🔍 Apne paper ka vishay likho — jaise: neuroprotection, plant extract, insomnia…">
+        <button class="go" id="jSearchBtn">Khojo ➜</button>
+      </div>
+      <div class="filt" id="jFilters">
+        <span data-f="scopus" class="on">Scopus ✔</span>
+        <span data-f="wos" class="on">Web of Science (SCIE / ESCI)</span>
+        <span data-f="free" class="on">💚 Sirf Free (₹0)</span>
+        <span data-f="paid">💰 Paid bhi dikhao</span>
+        <label class="budget">Budget: ₹<input id="jBudget" type="number" min="0" placeholder="____"> tak</label>
+        <span data-f="review" >Sirf Review chhaapne wale</span>
+      </div>
+      <div id="jResults"></div>
+      <div class="sach">
+        🕵️ <b>Journal Sach-Check:</b> journal ka naam yahan dalo →
+        <span class="sachline"><input id="sachName" type="text" placeholder="Journal ka naam likho…"><button class="btn small primary" id="sachBtn">Jaancho</button></span>
+        <div id="sachOut"></div>
+        <div style="margin-top:6px;">Yaad rahe: <b>UGC-CARE list Feb 2025 me band ho chuki hai</b> — “CARE approved 2026” bolne wala journal jhooth bol raha hai. Upar ki khoj hamare <b>haath se verify kiye hue</b> journals ki suchi par chalti hai; suchi se bahar ke journal ki jaanch chat me Babu se karwao.</div>
+      </div>
+    </section>
+
+    <!-- ================= LAB VIEW ================= -->
+    <section id="view-lab" class="hidden">
+      <div class="topbar"><h1>🧪 Lab &amp; Experiment Desk</h1><span class="pill blue">Saare lab upkaran, ek hi section me</span></div>
+      <div class="lab-wrap">
+        <div style="font-size:13.5px; color:#33477a; line-height:1.6;">Experiment ki <b>shuruaat se paper tak</b> ka har kaam isi ek desk par. Ye upkaran <b>chat ke dwara</b> chalte hain — Babu ko bolo, kaam hokar yahi milega (dusre charan me inke apne form aayenge).</div>
+        <div class="lab-grid">
+          <div class="lab-tool"><div class="lt">💊 Dose Guru</div><div class="ld">Purani khoj + LD50 se surakshit dose ki range, safety margin, aur kitne janwar (n) chahiye — 3Rs ke saath.</div></div>
+          <div class="lab-tool"><div class="lt">🧫 Fingerprint Helper</div><div class="ld">HPTLC/HPLC se extract ki pehchan, batch-to-batch tulna, aur journal ke layak fingerprint report.</div></div>
+          <div class="lab-tool"><div class="lt">🗄️ Fail Vault</div><div class="ld">Fail hue prayog aur na-kaam doses ka record — naya design bante hi purani galti par chetaavni.</div></div>
+          <div class="lab-tool"><div class="lt">📓 Live Lab Diary</div><div class="ld">Roz ki readings jama hoti jayein, graph khud bante jayein, ajeeb number (outlier) par turant sanket.</div></div>
+          <div class="lab-tool"><div class="lt">📊 Statistics Doctor</div><div class="ld">Sahi test khud chune — ANOVA/t-test, Shapiro-Levene jaanch, exact P aur effect size (η²) ke saath.</div></div>
+          <div class="lab-tool"><div class="lt">📈 Figure Scientist</div><div class="ld">Data se journal-standard graph — sahi axis, sahi unit, significance ke nishaan; galat unit bane hi na.</div></div>
+        </div>
+        <div style="font-size:12px; color:#54678f; font-weight:600; margin-top:11px;">🔗 Ye desk IAEC Protocol (Teen Roop) aur Quality Gate se juda hai — lab ka data seedha paper me jayega.</div>
+      </div>
+    </section>
+
+    <!-- ================= SHIELD VIEW ================= -->
+    <section id="view-shield" class="hidden">
+      <div class="topbar"><h1>🛡️ Humanizer + Originality Shield</h1><span class="pill blue">Har paper isse guzarta hai</span></div>
+      <div class="shield">
+        <div class="steps">
+          <div class="stp"><b>✍️ 1. Paragraph Humanizer</b><br>Har paragraph likhte samay hi insaani lehje me — vaaky lambai-chhotai badalti hui, AI wale ghise-pite shabd hataye hue.</div>
+          <div class="stp"><b>🔍 2. Nakal-Pakad (Similarity Self-Check)</b><br>Draft ko uske apne sources se milaya jata hai — source ke bahut paas wala hissa dobara apne shabdon me likha jata hai, sahi citation ke saath.</div>
+          <div class="stp"><b>🤖 3. AI-Pattern Report</b><br>Robotic pattern, dohraaye shabd aur ek-jaise vaaky — Quality Gate par puri report.</div>
+        </div>
+        <div class="honest">⚖️ Factory ka sachcha usool: ye teenon nakal aur robotic lekhan ko asal me bahut kam kar dete hain — lekin “100% detector-pass” ki guarantee duniya ka koi asal tool nahi de sakta. Asal suraksha hai: nakal bilkul nahi + har daave ka sahi citation.</div>
+      </div>
+    </section>
+
+    <!-- ================= REVIEWER VIEW ================= -->
+    <section id="view-reviewer" class="hidden">
+      <div class="topbar"><h1>🧐 Reviewer Mode</h1><span class="pill blue">Quality Gate ka hissa</span></div>
+      <div class="feat-grid">
+        <div class="feat"><h3>🧐 Reviewer Mode</h3><p>Paper taiyaar hote hi do sakht nakli reviewer use padhte hain — asli journal ki tarah aetraaz, aur ant me editor ka faisla. <b>Ye kaam Correction Desk (Reviewer-Proof) aur raat ke run me hota hai.</b></p></div>
+      </div>
+    </section>
+
+    <!-- ================= TEEN ROOP VIEW ================= -->
+    <section id="view-teenroop" class="hidden">
+      <div class="topbar"><h1>🎭 Ek Idea, Teen Roop</h1><span class="pill blue">Ek topic — teen taiyaar cheezein</span></div>
+      <div class="feat-grid">
+        <div class="feat"><h3>🎭 Ek Idea, Teen Roop</h3><p>Scanner se chuna har idea ek saath: 📄 Review Paper • 🧾 IAEC Protocol • 🎤 Conference Poster/Abstract. Raat ke run ke saath manga ja sakta hai — chat me bolo “teen roop wali”.</p></div>
+      </div>
+    </section>
+
+    <!-- ================= STUDENT VIEW ================= -->
+    <section id="view-student" class="hidden">
+      <div class="topbar"><h1>🎓 Student / Guide Mode</h1><span class="pill violet">Dusre charan me aayega</span></div>
+      <div class="feat-grid">
+        <div class="feat"><h3>🎓 Student / Guide Mode</h3><p>Students ke topic/data aur tumhare Haan/Na wala hisaab — <b>dusre charan me aayega</b> (students ke alag login lagenge).</p></div>
+      </div>
+    </section>
+
+    <!-- ================= CITATION VIEW ================= -->
+    <section id="view-citation" class="hidden">
+      <div class="topbar"><h1>📡 Citation Radar</h1><span class="pill blue">Saptahik jaanch — chat me report</span></div>
+      <div class="feat-grid">
+        <div class="feat"><h3>📡 Citation Radar</h3><p>Chhape hue papers par nazar: kaun tumhara kaam cite kar raha hai — saptahik jaanch Babu chat me dega; naye paper me sahi jagah tumhare purane kaam ka sujhav Quality Gate par.</p></div>
+      </div>
+    </section>
+
+    <!-- ================= SPECIAL ISSUE VIEW ================= -->
+    <section id="view-special" class="hidden">
+      <div class="topbar"><h1>🎯 Special Issue &amp; Deadline Radar</h1><span class="pill blue">Subah ki Scanner report ke saath</span></div>
+      <div class="feat-grid">
+        <div class="feat"><h3>🎯 Special Issue &amp; Deadline Radar</h3><p>Tumhare vishayon se milte special issues aur conference ki aakhri taareekhein — Scanner ki subah-wali report me hi sanket milega.</p></div>
+      </div>
+    </section>
+
+    <!-- ================= SAHYOGI VIEW ================= -->
+    <section id="view-sahyogi" class="hidden">
+      <div class="topbar"><h1>🤝 Sahyogi Scanner</h1><span class="pill blue">Sahyog ke sujhav — bhejna tumhari haan ke baad</span></div>
+      <div class="feat-grid">
+        <div class="feat"><h3>🤝 Sahyogi Scanner</h3><p>Scanner jin shodh-kartaon ko baar-baar dekhega, unhe sahyog ke liye sujhaya jayega. Parichay-patra bhi banega — bhejna tumhari haan ke baad hi.</p></div>
       </div>
     </section>
 
