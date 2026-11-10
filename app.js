@@ -13,8 +13,9 @@ function daysAgo(n){ const d = new Date(); d.setDate(d.getDate()-n); return d.to
 /* ============ providers ============ */
 const PROVIDERS = {
   gemini: { name:'Gemini (Google AI Studio)', base:'https://generativelanguage.googleapis.com/v1beta/openai', prefer:['gemini-2.5-flash','gemini-3-flash','gemini-2.0-flash','flash'] },
-  groq:   { name:'Groq', base:'https://api.groq.com/openai/v1', prefer:['llama-3.3-70b','llama-3.1-8b','qwen','llama'] },
-  nvidia: { name:'NVIDIA NIM', base:'https://integrate.api.nvidia.com/v1', prefer:['nemotron','llama'] }
+  groq:   { name:'Groq', base:'https://api.groq.com/openai/v1', prefer:['gpt-oss-120b','llama-3.3-70b','qwen','llama-3.1-8b','llama'] },
+  openrouter: { name:'OpenRouter (300+ models, kai FREE)', base:'https://openrouter.ai/api/v1', freeFirst:true, prefer:['nemotron-3-ultra','gemma-4-31b','gemma','deepseek','llama-3.3','qwen','llama'], note:'Ek key, 300+ models. Test dabane par FREE (:free wale) models pehle chunega — free list me sabse bada model (Nemotron 3 Ultra 550B) apne aap lagega. Key yahan se banti hai: openrouter.ai/keys (free account, card nahi lagta). Free models par roz ki seema hoti hai aur free list samay-samay par badalti rehti hai.' },
+  nvidia: { name:'NVIDIA NIM', base:'https://integrate.api.nvidia.com/v1', prefer:['nemotron','llama'], note:'⚠️ NVIDIA apni API ko website/browser se seedha call karne nahi deta (CORS bandish) — isiliye ye key yaha Test me fail hogi, key galat nahi hai. NVIDIA sirf Babu ke FreeLLMAPI (server) se chalta hai; is dabbe ko khali chhod do.' }
 };
 function getKeys(){ return store.get('keys', {}); }
 function anyKey(){ const k = getKeys(); return Object.keys(PROVIDERS).some(p => k[p] && k[p].key && k[p].model); }
@@ -31,8 +32,10 @@ async function fetchModels(p, key){
 }
 function pickModel(p, ids){
   const pref = PROVIDERS[p].prefer;
-  for (const want of pref){ const hit = ids.find(id => id.toLowerCase().includes(want)); if (hit) return hit; }
-  return ids[0] || null;
+  let pool = ids;
+  if (PROVIDERS[p].freeFirst){ const f = ids.filter(id => id.toLowerCase().includes(':free')); if (f.length) pool = f; }
+  for (const want of pref){ const hit = pool.find(id => id.toLowerCase().includes(want)); if (hit) return hit; }
+  return pool[0] || ids[0] || null;
 }
 async function callAI(messages, maxTokens){
   const keys = getKeys();
@@ -502,7 +505,8 @@ function renderKeys(){
     d.innerHTML = '<div class="kh"><span class="kn">' + PROVIDERS[p].name + '</span><span class="muted">' + (cfg.key ? 'Key save hai' + (cfg.model ? ' • Model: ' + esc(cfg.model) : ' • Model nahi chuna — Test karo') : 'Key nahi hai') + '</span></div>' +
       '<div class="kr"><input type="password" placeholder="API key yahan chipkao" value="' + (cfg.key ? '••••••••••••' : '') + '">' +
       '<select>' + (cfg.model ? '<option>' + esc(cfg.model) + '</option>' : '<option value="">— model —</option>') + '</select>' +
-      '<button class="btn small save">💾 Save</button><button class="btn small primary test">🧪 Test</button></div><div class="kmsg"></div>';
+      '<button class="btn small save">💾 Save</button><button class="btn small primary test">🧪 Test</button></div>' +
+      (PROVIDERS[p].note ? '<div class="muted" style="margin-top:6px;font-size:.85em;">' + esc(PROVIDERS[p].note) + '</div>' : '') + '<div class="kmsg"></div>';
     const input = d.querySelector('input'), sel = d.querySelector('select'), msg = d.querySelector('.kmsg');
     d.querySelector('.save').addEventListener('click', () => {
       const v = input.value.trim();
@@ -519,6 +523,7 @@ function renderKeys(){
       msg.textContent = '⏳ Test ho raha hai…';
       try {
         const ids = await fetchModels(p, v);
+        if (PROVIDERS[p].freeFirst) ids.sort((a, b) => (b.toLowerCase().includes(':free') ? 1 : 0) - (a.toLowerCase().includes(':free') ? 1 : 0));
         const model = pickModel(p, ids);
         sel.innerHTML = ids.map(id => '<option' + (id === model ? ' selected' : '') + '>' + esc(id) + '</option>').join('');
         const all = getKeys(); all[p] = { key: v, model };
