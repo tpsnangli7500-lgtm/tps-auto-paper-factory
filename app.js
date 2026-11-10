@@ -532,8 +532,9 @@ function renderKeys(){
         refreshKeyPill();
       } catch(e){ msg.textContent = '⚠️ Test fail: ' + e.message + ' — key sahi se chipkai hai, jaanch lo.'; }
     });
-    sel.addEventListener('focus', async () => {
-      if (sel.options.length > 1) return;
+    let modelsLoaded = false;
+    async function loadModels(){
+      if (modelsLoaded || sel.options.length > 1) return;
       let v = input.value.trim();
       const saved = (getKeys()[p] || {}).key;
       if (!v || v.startsWith('••')) v = saved;
@@ -544,10 +545,20 @@ function renderKeys(){
         if (PROVIDERS[p].freeFirst) ids.sort((a, b) => (b.toLowerCase().includes(':free') ? 1 : 0) - (a.toLowerCase().includes(':free') ? 1 : 0));
         const cur = (getKeys()[p] || {}).model;
         sel.innerHTML = ids.map(id => '<option' + (id === cur ? ' selected' : '') + '>' + esc(id) + '</option>').join('');
-        msg.textContent = '✔ ' + ids.length + ' models load ho gaye — model chuno, phir 💾 Save dabao.';
+        modelsLoaded = true;
+        msg.textContent = '✔ ' + ids.length + ' models load ho gaye — model chuno, wo turant save ho jayega.';
       } catch(e){ msg.textContent = '⚠️ Models load nahi hue: ' + e.message; }
+    }
+    sel.addEventListener('focus', loadModels);
+    sel.addEventListener('change', () => {
+      if (!sel.value) return;
+      const all = getKeys(); all[p] = all[p] || {};
+      all[p].model = sel.value;
+      store.set('keys', all); refreshKeyPill();
+      msg.textContent = '✔ Model save ho gaya: ' + sel.value;
     });
     box.appendChild(d);
+    if (cfg.key && p !== 'nvidia') loadModels();
   });
 }
 $('#areasSave').addEventListener('click', () => {
