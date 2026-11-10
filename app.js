@@ -532,6 +532,21 @@ function renderKeys(){
         refreshKeyPill();
       } catch(e){ msg.textContent = '⚠️ Test fail: ' + e.message + ' — key sahi se chipkai hai, jaanch lo.'; }
     });
+    sel.addEventListener('focus', async () => {
+      if (sel.options.length > 1) return;
+      let v = input.value.trim();
+      const saved = (getKeys()[p] || {}).key;
+      if (!v || v.startsWith('••')) v = saved;
+      if (!v) return;
+      msg.textContent = '⏳ Models load ho rahe hain…';
+      try {
+        const ids = await fetchModels(p, v);
+        if (PROVIDERS[p].freeFirst) ids.sort((a, b) => (b.toLowerCase().includes(':free') ? 1 : 0) - (a.toLowerCase().includes(':free') ? 1 : 0));
+        const cur = (getKeys()[p] || {}).model;
+        sel.innerHTML = ids.map(id => '<option' + (id === cur ? ' selected' : '') + '>' + esc(id) + '</option>').join('');
+        msg.textContent = '✔ ' + ids.length + ' models load ho gaye — model chuno, phir 💾 Save dabao.';
+      } catch(e){ msg.textContent = '⚠️ Models load nahi hue: ' + e.message; }
+    });
     box.appendChild(d);
   });
 }
