@@ -316,14 +316,67 @@ function fillJournalSelect(){
 /* ============ Editor ============ */
 const page = $('#wordPage');
 const SAMPLE = 'Beyond Cardenolides: Pentacyclic Triterpenoids of Nerium oleander — A Review\nTeenu Pal, Prabhat Singh — SVSU, Meerut\n\nAbstract\nUrsolic acid and oleanolic acid are pentacyclic triterpenoids reported in the leaves of Nerium oleander. The extract was showed significant neuroprotective activity in rodent models. Oxidative stress markers such as GSH, TBARS and IL-6 were measured in brain homogenates.\n\nRecent evidence suggests that both compounds activate the Nrf2 pathway and suppress NF-kB-driven neuroinflammation, although neither compound obtained from oleander itself has yet been tested in a neural model.';
-function setEditorText(t){ page.innerText = t; store.set('doc', t); updateWC(); }
 function getEditorText(){ return page.innerText || ''; }
+function getEditorHTML(){ return page.innerHTML || ''; }
+function saveDoc(){ store.set('doc', getEditorText()); store.set('docHtml', getEditorHTML()); }
+function setEditorText(t){ page.innerText = t; saveDoc(); updateWC(); }
+function setEditorHTML(h){ page.innerHTML = h; saveDoc(); updateWC(); }
 let wcTimer = null;
 function updateWC(){
   const t = getEditorText().trim();
   $('#wcLine').textContent = 'Shabd: ' + (t ? t.split(/\s+/).length : 0);
 }
-page.addEventListener('input', () => { clearTimeout(wcTimer); wcTimer = setTimeout(() => { store.set('doc', getEditorText()); updateWC(); }, 400); });
+page.addEventListener('input', () => { clearTimeout(wcTimer); wcTimer = setTimeout(() => { saveDoc(); updateWC(); }, 400); });
+/* ===== FIX 2026-11-17 (2): Paste bhi format ke saath, Copy bhi format ke saath =====
+   Pehle: autosave sirf plain text save karta tha (page band/refresh par format
+   ud jata tha) aur Copy button sirf plain text copy karta tha.
+   Ab: (1) doc ka HTML roop bhi save hota hai, (2) Paste par Word/web ka format
+   (bold/italic/heading/list/table/font) saaf karke waisa ka waisa lagta hai,
+   (3) Copy (button ho ya Ctrl+C) clipboard me HTML + plain dono jata hai —
+   Word me paste karne par format saath jayega. */
+function cleanPastedHTML(html){
+  try {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    let out = doc.body ? doc.body.innerHTML : html;
+    const box = document.createElement('div'); box.innerHTML = out;
+    box.querySelectorAll('script,style,meta,link,title,xml').forEach(el => el.remove());
+    box.querySelectorAll('*').forEach(el => {
+      [...el.attributes].forEach(a => {
+        const n = a.name.toLowerCase();
+        if (n.startsWith('on') || n === 'class' && /^Mso/i.test(a.value)) el.removeAttribute(a.name);
+        else if (n === 'style') el.setAttribute('style', a.value.split(';').filter(p => !/mso-/i.test(p)).join(';'));
+      });
+      if (el.tagName === 'O:P' || el.tagName === 'O:SMARTTAGTYPE') el.replaceWith(...el.childNodes);
+    });
+    return box.innerHTML;
+  } catch(e){ return ''; }
+}
+page.addEventListener('paste', e => {
+  const cd = e.clipboardData || window.clipboardData;
+  if (!cd) return;
+  e.preventDefault();
+  page.focus();
+  const html = cd.getData('text/html') || '';
+  const text = cd.getData('text/plain') || '';
+  if (html){
+    const clean = cleanPastedHTML(html);
+    if (clean && !document.execCommand('insertHTML', false, clean)) setEditorHTML(getEditorHTML() + clean);
+  } else if (text){
+    const asHtml = esc(text).replace(/\n{2,}/g, '<br><br>').replace(/\n/g, '<br>');
+    if (!document.execCommand('insertHTML', false, asHtml)) document.execCommand('insertText', false, text);
+  }
+  saveDoc(); updateWC();
+});
+page.addEventListener('copy', e => {
+  const sel = window.getSelection();
+  if (!sel || sel.isCollapsed || !e.clipboardData) return;
+  try {
+    const div = document.createElement('div'); div.appendChild(sel.getRangeAt(0).cloneContents());
+    e.clipboardData.setData('text/html', div.innerHTML);
+    e.clipboardData.setData('text/plain', sel.toString());
+    e.preventDefault();
+  } catch(err){ /* browser ka apna rich copy chalega */ }
+});
 $$('.wtoolbar [data-cmd]').forEach(b => b.addEventListener('click', () => { document.execCommand(b.dataset.cmd, false, null); page.focus(); }));
 $('#fontSel').addEventListener('change', e => { page.style.fontFamily = e.target.value + ', Georgia, serif'; });
 $('#sizeSel').addEventListener('change', e => { page.style.fontSize = e.target.value + 'pt'; });
@@ -333,7 +386,30 @@ $('#dlTxt').addEventListener('click', () => {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = ($('#docName').value || 'paper').replace(/\.docx$/i,'') + '.txt'; a.click(); URL.revokeObjectURL(a.href);
 });
-$('#copyBtn').addEventListener('click', async () => { try { await navigator.clipboard.writeText(getEditorText()); alert('Copy ho gaya ✔'); } catch(e){ alert('Copy nahi ho paya — text chun kar haath se copy karo.'); } });
+$('#copyBtn').addEventListener('click', async () => {
+  const html = getEditorHTML(), text = getEditorText();
+  try {
+    if (navigator.clipboard && window.ClipboardItem){
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html], { type:'text/html' }),
+        'text/plain': new Blob([text], { type:'text/plain' })
+      })]);
+      alert('Copy ho gaya ✔ — Word me paste karne par format bhi saath jayega.');
+      return;
+    }
+    throw new Error('rich-copy unsupported');
+  } catch(e) {
+    try {
+      page.focus();
+      const sel = window.getSelection(); const range = document.createRange();
+      range.selectNodeContents(page); sel.removeAllRanges(); sel.addRange(range);
+      const ok = document.execCommand('copy');
+      sel.removeAllRanges();
+      if (ok){ alert('Copy ho gaya ✔ — format ke saath.'); return; }
+    } catch(e2){ /* neeche */ }
+    alert('Copy nahi ho paya — text chun kar Ctrl+C dabao (wo bhi format ke saath jayega).');
+  }
+});
 
 function aiCard(html){
   const out = $('#aiOut');
@@ -514,14 +590,14 @@ $('#tFormat').addEventListener('click', (e) => {
 });
 $('#tVersions').addEventListener('click', () => {
   const vers = store.get('versions', []);
-  vers.unshift({ at: new Date().toLocaleString('en-IN'), text: getEditorText() });
+  vers.unshift({ at: new Date().toLocaleString('en-IN'), text: getEditorText(), html: getEditorHTML() });
   store.set('versions', vers.slice(0, 10));
   renderVersions();
 });
 function renderVersions(){
   const vers = store.get('versions', []);
   $('#verList').innerHTML = vers.map((v, i) => '<div class="finding">🕘 ' + esc(v.at) + ' <button class="yn y" data-vi="' + i + '">↩ Yahi Wapas Laao</button></div>').join('');
-  $$('#verList [data-vi]').forEach(b => b.addEventListener('click', () => { setEditorText(vers[+b.dataset.vi].text); alert('Purana roop wapas aa gaya ✔'); }));
+  $$('#verList [data-vi]').forEach(b => b.addEventListener('click', () => { const v = vers[+b.dataset.vi]; if (v.html) setEditorHTML(v.html); else setEditorText(v.text); alert('Purana roop wapas aa gaya ✔'); }));
 }
 $('#tDiff').addEventListener('click', () => $('#diffBox').classList.toggle('hidden'));
 $('#diffGo').addEventListener('click', () => {
@@ -614,7 +690,8 @@ refreshKeyPill();
 $('#stJournals').textContent = JOURNALS.length;
 $('#stDrafts').textContent = store.get('drafts', []).length;
 const savedDoc = store.get('doc', '');
-setEditorText(savedDoc || SAMPLE);
+const savedHtml = store.get('docHtml', '');
+if (savedHtml) setEditorHTML(savedHtml); else setEditorText(savedDoc || SAMPLE);
 const dn = store.get('docName', ''); if (dn) $('#docName').value = dn;
 const lastScan = store.get('scan', null);
 if (lastScan && lastScan.papers && lastScan.papers.length) renderScan(lastScan.papers); else scanNow();
