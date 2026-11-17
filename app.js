@@ -417,6 +417,17 @@ function needKey(){
   showView('editor'); return true;
 }
 function spliceReplace(oldTxt, newTxt){
+  /* Pehle text-node ke andar hi badlo — baaki pure page ka format (bold/
+     heading/list) waisa ka waisa bacha rehta hai. Shabd do tukdon me bata
+     ho tabhi purana plain tarika (jo format reset karta hai) apnao. */
+  try {
+    const walker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT);
+    let n;
+    while ((n = walker.nextNode())){
+      const i = n.textContent.indexOf(oldTxt);
+      if (i >= 0){ n.textContent = n.textContent.slice(0, i) + newTxt + n.textContent.slice(i + oldTxt.length); saveDoc(); updateWC(); return true; }
+    }
+  } catch(e){ /* neeche fallback */ }
   const t = getEditorText();
   const i = t.indexOf(oldTxt);
   if (i < 0){ alert('Chuna hua hissa nahi mila (shayad badal gaya hai). Dobara chun kar koshish karo.'); return false; }
