@@ -367,17 +367,11 @@ page.addEventListener('paste', e => {
   }
   saveDoc(); updateWC();
 });
-page.addEventListener('copy', e => {
-  const sel = window.getSelection();
-  if (!sel || sel.isCollapsed || !e.clipboardData) return;
-  try {
-    const div = document.createElement('div'); div.appendChild(sel.getRangeAt(0).cloneContents());
-    e.clipboardData.setData('text/html', div.innerHTML);
-    e.clipboardData.setData('text/plain', sel.toString());
-    e.preventDefault();
-  } catch(err){ /* browser ka apna rich copy chalega */ }
-});
-$$('.wtoolbar [data-cmd]').forEach(b => b.addEventListener('click', () => { document.execCommand(b.dataset.cmd, false, null); page.focus(); }));
+/* NOTE: Ctrl+C par koi apna handler NAHI lagaya gaya — jaanch me paya ki
+   haath se banaya hua fragment <b> jaise tag gira deta tha, jabki browser ka
+   apna (native) copy format sabse sahi rakhta hai. Format-wala copy Copy
+   button se ClipboardItem (HTML+plain) dwara hota hai. */
+$$('.wtoolbar [data-cmd]').forEach(b => b.addEventListener('click', () => { document.execCommand(b.dataset.cmd, false, null); page.focus(); saveDoc(); updateWC(); }));
 $('#fontSel').addEventListener('change', e => { page.style.fontFamily = e.target.value + ', Georgia, serif'; });
 $('#sizeSel').addEventListener('change', e => { page.style.fontSize = e.target.value + 'pt'; });
 $('#docName').addEventListener('input', e => store.set('docName', e.target.value));
