@@ -390,23 +390,61 @@ $('#tRewrite').addEventListener('click', async () => {
   } catch(e){ card.textContent = '⚠️ Nahi ho paya: ' + e.message; }
 });
 $('#tSynonym').addEventListener('click', async () => {
-  if (needKey()) return;
-  const s = selText().trim();
-  if (!s || /\s/.test(s)){ alert('Pehle Editor me EK shabd chun (select) karo.'); return; }
+  /* FIX 2026-11-17: Synonym ab AI key par NAHI atakta — pehle free Datamuse
+     dictionary se paryay aate hain (bina key, bina login). AI sirf backup hai.
+     Selection na mile to shabd type karne ka dabba khulta hai (phone par
+     select karna mushkil hota hai, wahi asal rukawat thi). */
+  let s = selText().trim().replace(/^[^A-Za-z]+|[^A-Za-z'-]+$/g, '');
+  if (!s || /\s/.test(s)){
+    s = ((prompt('Kaun se EK shabd ke synonyms chahiye? Yahan likho:') || '').trim().replace(/^[^A-Za-z]+|[^A-Za-z'-]+$/g, ''));
+    if (!s) return;
+    if (/\s/.test(s)){ alert('Sirf EK shabd likho — vaakya nahi.'); return; }
+  }
   const card = aiCard('⏳ Paryay khoj raha hai…');
-  try {
-    const out = await callAI([
-      { role:'system', content:'Give 6 English synonyms for the word, suitable for academic writing, comma-separated only. Never change scientific/drug names — if the word is a scientific term, reply: NONE' },
-      { role:'user', content: s }
-    ], 120);
-    if (/^NONE/i.test(out)){ card.textContent = '🔒 Ye vaigyanik shabd hai — iska paryay nahi badalna chahiye.'; return; }
-    card.innerHTML = '<b>🔁 “' + esc(s) + '” ke paryay — dabao to badle:</b>';
-    out.split(',').map(x => x.trim()).filter(Boolean).forEach(v => {
+  const showSyns = (list) => {
+    if (!list.length){ card.textContent = '🔒 “' + s + '” ke paryay nahi mile — ye vaigyanik/technical shabd ho sakta hai, ise aise hi rakho.'; return; }
+    card.innerHTML = '<b>🔁 “' + esc(s) + '” ke paryay — dabao to paper me badle:</b>';
+    list.forEach(v => {
       const b = document.createElement('button'); b.className = 'tbtn'; b.textContent = v;
-      b.addEventListener('click', () => { if (spliceReplace(s, v)) card.innerHTML = '✔ Shabd badal gaya.'; });
+      b.addEventListener('click', () => {
+        if (getEditorText().includes(s)){ if (spliceReplace(s, v)) card.innerHTML = '✔ Shabd badal gaya: ' + esc(s) + ' → ' + esc(v); }
+        else { card.innerHTML = 'ℹ️ “' + esc(s) + '” paper ke text me nahi mila, isliye badla nahi — paryay: ' + esc(v); }
+      });
       card.appendChild(b);
     });
-  } catch(e){ card.textContent = '⚠️ Nahi ho paya: ' + e.message; }
+  };
+  try {
+    /* Past-tense shabdon (showed, indicated, reduced) par Datamuse khaali
+       deta hai — isliye mool roop (show, indicate, reduce) bhi try karo. */
+    const w0 = s.toLowerCase();
+    const cands = [w0];
+    if (w0.endsWith('ied') && w0.length > 4) cands.push(w0.slice(0, -3) + 'y');
+    if (w0.endsWith('ed') && w0.length > 3){ cands.push(w0.slice(0, -2)); cands.push(w0.slice(0, -1)); }
+    if (w0.endsWith('ing') && w0.length > 5){ cands.push(w0.slice(0, -3)); cands.push(w0.slice(0, -3) + 'e'); }
+    let list = [];
+    for (const c of [...new Set(cands)]){
+      const r = await fetch('https://api.datamuse.com/words?rel_syn=' + encodeURIComponent(c) + '&max=8');
+      if (!r.ok) continue;
+      const j = await r.json();
+      list = (j || []).map(x => x.word).filter(w => w && !/\s/.test(w) && w.toLowerCase() !== w0 && w.toLowerCase() !== c).slice(0, 6);
+      if (list.length) break;
+    }
+    if (list.length){ showSyns(list); return; }
+    throw new Error('empty');
+  } catch(e) {
+    /* Datamuse se na mile to AI backup (agar key ho) */
+    if (anyKey()){
+      try {
+        const out = await callAI([
+          { role:'system', content:'Give 6 English synonyms for the word, suitable for academic writing, comma-separated only. Never change scientific/drug names — if the word is a scientific term, reply: NONE' },
+          { role:'user', content: s }
+        ], 120);
+        if (/^NONE/i.test(out)){ card.textContent = '🔒 Ye vaigyanik shabd hai — iska paryay nahi badalna chahiye.'; return; }
+        showSyns(out.split(',').map(x => x.trim()).filter(Boolean).slice(0, 6)); return;
+      } catch(e2){ /* neeche wala sandesh */ }
+    }
+    showSyns([]);
+  }
 });
 $('#tShorten').addEventListener('click', async () => {
   if (needKey()) return;
