@@ -434,6 +434,73 @@ function spliceReplace(oldTxt, newTxt){
   setEditorText(t.slice(0, i) + newTxt + t.slice(i + oldTxt.length));
   return true;
 }
+/* ===== FIX 2026-11-18: Grammar 'Lagao' ab format-safe hai =====
+   Pehle 'Lagao' setEditorText(fixed) karta tha — poora paper plain text se
+   badal jata tha, bold/heading/list sab ud jata tha. Ab sudhaar vaakya-ba-
+   vaakya spliceReplace wale tarike se lagta hai: sirf badla hua vaakya usi
+   text-node ke andar badalta hai, baaki format waisa ka waisa bacha rehta
+   hai. AI ne vaakyon ki ginti badal di ho (jod/ghata diya ho) to khud-ba-
+   khud NAHI lagta — pehle chetaavni aati hai. */
+function splitSentences(text){
+  const ABBR = ['et al', 'al', 'e.g', 'i.e', 'fig', 'dr', 'mr', 'mrs', 'ms', 'vs', 'no', 'vol', 'pp', 'st', 'approx'];
+  const segs = [];
+  let cur = '';
+  const push = () => { if (cur.trim()) segs.push(cur); cur = ''; };
+  for (let i = 0; i < text.length; i++){
+    const ch = text[i];
+    if (ch === '\n'){ push(); continue; }
+    cur += ch;
+    if (ch === '.' || ch === '!' || ch === '?'){
+      const next = text[i + 1];
+      if (next === undefined || /\s/.test(next)){
+        if (ch === '.'){
+          const before = cur.slice(0, -1);
+          const m = before.match(/([A-Za-z][A-Za-z.]*)$/);
+          const tok = m ? m[1] : '';
+          if (ABBR.indexOf(tok.toLowerCase()) >= 0) continue;
+          if (/^[A-Z]$/.test(tok)) continue;
+          if (/^(?:[A-Z]\.)*[A-Z]$/.test(tok)) continue;
+        }
+        push();
+      }
+    }
+  }
+  push();
+  return segs;
+}
+function spliceReplaceQuiet(oldTxt, newTxt){
+  /* spliceReplace jaisa hi text-node ke andar badlav, lekin (1) koi alert
+     nahi, (2) vaakya do text-node me bata ho to purana plain tarika (jo
+     format reset karta hai) bilkul NAHI — false lautata hai. */
+  if (!oldTxt) return false;
+  try {
+    const walker = document.createTreeWalker(page, NodeFilter.SHOW_TEXT);
+    let n;
+    while ((n = walker.nextNode())){
+      const i = n.textContent.indexOf(oldTxt);
+      if (i >= 0){ n.textContent = n.textContent.slice(0, i) + newTxt + n.textContent.slice(i + oldTxt.length); saveDoc(); updateWC(); return true; }
+    }
+  } catch(e){ /* neeche false */ }
+  return false;
+}
+function applyGrammarFix(origText, fixedText, card){
+  const o = splitSentences(origText), f = splitSentences(fixedText);
+  if (o.length !== f.length){
+    card.innerHTML = '⚠️ <b>Grammar ne vaakya jod/badale hain</b> (' + o.length + ' → ' + f.length + ' vaakya). Vaakya-ba-vaakya lagana surakshit nahi hai — poora sudhaar lagane se <b>format (bold/heading/list) ud jayega</b>.' +
+      '<div class="acts"><button class="yn y">Phir bhi poora lagao (format udega)</button><button class="yn n">Chhodo</button></div>';
+    card.querySelector('.y').addEventListener('click', () => { setEditorText(fixedText); card.innerHTML = '✔ Poora sudhaar lag gaya (format plain ho gaya hai).'; });
+    card.querySelector('.n').addEventListener('click', () => { card.innerHTML = 'Fix nahi lagaya.'; });
+    return;
+  }
+  let applied = 0, failed = 0;
+  for (let i = 0; i < o.length; i++){
+    const os = o[i].trim(), fs = f[i].trim();
+    if (os === fs) continue;
+    if (spliceReplaceQuiet(os, fs)) applied++; else failed++;
+  }
+  saveDoc(); updateWC();
+  card.innerHTML = '✔ ' + applied + ' vaakya sudhre, format waisa ka waisa bacha.' + (failed ? ' ' + failed + ' vaakya nahi mile (haath se dekh lena).' : '');
+}
 function selText(){ const s = window.getSelection(); return s ? s.toString() : ''; }
 
 $('#tGrammar').addEventListener('click', async () => {
@@ -447,7 +514,7 @@ $('#tGrammar').addEventListener('click', async () => {
       { role:'user', content: t.slice(0, 6000) }
     ], 2200);
     card.innerHTML = '<b>✔ Sudhaara hua roop (preview):</b>\n' + esc(fixed.slice(0, 700)) + (fixed.length > 700 ? '…' : '') + '<div class="acts"><button class="yn y">✔ Lagao</button><button class="yn n">✖ Chhodo</button></div>';
-    card.querySelector('.y').addEventListener('click', () => { setEditorText(fixed); card.innerHTML = '✔ Sudhaar lag gaya. Purana roop chahiye to “Purana Roop Wapas” me snapshot rakha karo.'; });
+    card.querySelector('.y').addEventListener('click', () => { applyGrammarFix(t.slice(0, 6000), fixed, card); });
     card.querySelector('.n').addEventListener('click', () => { card.remove(); });
   } catch(e){ card.textContent = '⚠️ Nahi ho paya: ' + e.message; }
 });
